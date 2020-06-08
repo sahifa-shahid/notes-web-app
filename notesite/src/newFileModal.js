@@ -6,15 +6,27 @@ import './App.css';
 export default function NewFileModal({ open, setOpen, listID, setListID }) {
     const [title, setTitle] = useState("")
 
-    function submit() {
-        let copy = listID
-        copy.push({"title": title, "data": ""})
-        setListID([...copy])
+    async function add() {
+        try {
+            let headers = {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 'title': title }),
+            }
+            let response = await fetch('/addNote', headers);
+            let responseJson = await response.json();
+            let copy = listID
+            copy.push({ "_id": responseJson._id, "title": title, "data": "" })
+            setListID([...copy])
+        }
+        catch (error) {
+            console.error(error);
+        }
     }
 
     return (
         <div className="modal-container">
-            <Modal show={open} onHide={() => {setOpen(false); setTitle("")}}>
+            <Modal show={open} onHide={() => { setOpen(false); setTitle("") }}>
                 <Modal.Header>
                     <Modal.Title>New Document</Modal.Title>
                 </Modal.Header>
@@ -29,7 +41,7 @@ export default function NewFileModal({ open, setOpen, listID, setListID }) {
                     </form>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button onClick={() => { setOpen(false); submit(); setTitle("") }} appearance="default">
+                    <Button onClick={() => { setOpen(false); add(); setTitle("") }} appearance="default">
                         Submit
                     </Button>
                 </Modal.Footer>

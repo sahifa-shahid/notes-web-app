@@ -1,14 +1,29 @@
 import React from 'react';
-import { Modal, Button } from 'rsuite';
+import { Modal, Button, Alert } from 'rsuite';
 
 import './App.css';
 
-export default function DeleteFileModal({ openWarning, setOpenWarning, listID, setListID, index}) {
-    function deleteDoc() {
-        let copy = listID
-        copy.splice(index, 1)
-        setListID([...copy])
+export default function DeleteFileModal({ openWarning, setOpenWarning, listID, setListID, index }) {
+
+    async function deleteDoc() {
+        try {
+            let headers = {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ '_id': listID[index]._id }),
+            }
+            await fetch('/deleteNote', headers);
+            let copy = listID
+            copy.splice(index, 1)
+            setListID([...copy])
+            Alert.success('The document has been successfully deleted!')
+        }
+        catch (error) {
+            console.error(error);
+            Alert.error('Sorry, an error occurred! Please try again')
+        }
     }
+
     return (
         <div className="modal-container">
             <Modal show={openWarning} onHide={() => setOpenWarning(false)} size="xs">

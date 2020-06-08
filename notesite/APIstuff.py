@@ -2,7 +2,7 @@ from flask import Flask, jsonify, request
 import json
 import pymongo
 import argparse 
-#from bson.objectid import ObjectId
+from bson.objectid import ObjectId
 
 def parseOpts(): 
     parser = argparse.ArgumentParser(
@@ -30,37 +30,36 @@ mongo = pymongo.MongoClient(CONNECTION_STRING, maxPoolSize=50, connect=False)
 
 collection = mongo.notesite.notesList
 
-@app.route('/getNote', methods=['POST'])
+@app.route('/getNote')
 def getNote():
-    info = request.get_json()
-    document = collection.find_one({"title": info["title"]})
-    document['_id'] = str(document['_id'])
-    return jsonify(document)
+    document = collection.find()
+    # document['_id'] = str(document['_id'])
+    return jsonify({"text" : str(document)})
 
 @app.route('/saveNote', methods=['POST'])
 def saveNote():
     info = request.get_json()
-    collection.update_one({
-        "title": info["title"]
+    document = collection.update_one({
+        "_id": ObjectId(info["_id"])
     },
     {
         "$set": {
-            "list": info["list"]
+            "data": info["data"]
         }
     })
-    return jsonify({"code" : 200 })
+    return jsonify({"code" : str(document.acknowledged) })
 
 @app.route('/addNote', methods=['POST'])
 def addNote():
     info = request.get_json()
-    collection.insert_one({"title": info["title"]})
-    return jsonify({"code" : 200 })
+    document = collection.insert_one({"title": info["title"], "data": "null"})
+    return jsonify({"code" : str(document.acknowledged), "_id": str(document.inserted_id) })
 
 @app.route('/deleteNote', methods=['POST'])
 def deleteNote():
     info = request.get_json()
-    collection.delete_one({"title": info["title"]})
-    return jsonify({"code" : 200})
+    document = collection.delete_one({"_id": ObjectId(info["_id"])})
+    return jsonify({"code" : str(document.acknowledged)})
 
 
 if __name__ == '__main__':

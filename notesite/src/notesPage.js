@@ -13,19 +13,21 @@ export default function NotesPage({listID, setListID, index }) {
     setListID([...copy])
   }
 
-  async function get() { 
+  console.log(listID)
+
+  async function saveDoc() { 
     try {
       let headers = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 'title': 'GroceryList' }),
+        body: JSON.stringify({ '_id': listID[index]._id, 'data': listID[index].data }),
       }
-      let response = await fetch('/getNote', headers);
-      let info = await response.json();
-      setData([...info.list])
+      await fetch('/saveNote', headers);
+      Alert.success('The document has been saved!')
     }
     catch (error) {
       console.error(error);
+      Alert.error('Sorry, an error occurred! Please try again')
     }
   }
 
@@ -41,7 +43,7 @@ export default function NotesPage({listID, setListID, index }) {
         <p style={{ color: 'black', fontSize: 50, marginBottom: 5, marginTop: 5, fontFamily: 'Poppins-Light' }}>{listID[index].title}</p>
         <div className="right">
           <ButtonToolbar>
-            <IconButton icon={<Icon icon="save" />} onClick={() => Alert.success('The document has been saved!')}/>
+            <IconButton icon={<Icon icon="save" />} onClick={() => { saveDoc() }}/>
             <ButtonGroup>
               <IconButton icon={<Icon icon="bold" />} />
               <IconButton icon={<Icon icon="italic" />} />
@@ -68,7 +70,7 @@ export default function NotesPage({listID, setListID, index }) {
             value={listID[index].data}
             onChange={text => {save(text.target.value)}} />
           <ButtonToolbar style={{marginTop: 5}}>
-            <IconButton icon={<Icon icon="save" />} onClick={() => {Alert.success('The document has been saved!')}}>Save</IconButton>
+            <IconButton icon={<Icon icon="save" />} onClick={() => { saveDoc() }}>Save</IconButton>
           </ButtonToolbar>
         </form>
       </div>
